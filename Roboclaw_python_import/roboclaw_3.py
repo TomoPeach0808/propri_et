@@ -1,6 +1,12 @@
 import random
 import sys
+
+# # For lab desktop
+# sys.path.append("C:\\Users\\TKAWAGUCHI\\AppData\\Roaming\\Python\\Python311\\site-packages")
+
+#For Tomomi's laptop
 sys.path.append('/Users/kawapreachy/opt/anaconda3/lib/python3.9/site-packages')
+
 import serial
 import struct
 import time
