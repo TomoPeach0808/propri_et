@@ -135,6 +135,7 @@ classdef Roboclaw
           end
           
           % Open Serial port connection
+	  % % Note: Perhaps add a function to close the connection? % % 
           function result = Open(obj)
             try
                 obj.port = serialport(obj.comport, obj.rate, "Timeout", 1);
