@@ -249,14 +249,14 @@ classdef Roboclaw
 
           function result = write1(obj, address, cmd, val)
               trys = obj.retries;
-              while trys
-                  trys = trys - 1;
+              while trys > 0
                   obj.sendcommand(address, cmd);
                   obj.writebyte(val)
                   if obj.writechecksum
                       result = true;
                       return
                   end
+		  trys = trys - 1;
               end
               result = false;
           end
