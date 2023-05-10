@@ -11,10 +11,10 @@ classdef Roboclaw
         port;
     end
 
-    % properties (Constant)
-    %     %Commands (cmd)
-    %     M1FORWARD = 0;
-	% 	M1BACKWARD = 1;
+    properties (Constant)
+        %Commands (cmd)
+        M1FORWARD = 0;
+		M1BACKWARD = 1;
 	% 	SETMINMB = 2;
 	% 	SETMAXMB = 3;
 	% 	M2FORWARD = 4;
@@ -106,11 +106,16 @@ classdef Roboclaw
 	% 	WRITEEEPROM = 253;
 	% 	FLAGBOOTLOADER = 255;
     % 
-    % end
-    % 
+    end
+    
     methods
+
         % Define roboclaw
           function obj = Roboclaw(comport,rate,timeout,retries)
+
+              % Comport and Rate must be defined by the user
+              % Timeout and retries are optional variables
+
               if nargin > 0 && ~isempty(comport)
                   obj.comport = comport;
               end
@@ -140,8 +145,10 @@ classdef Roboclaw
             result = 1; % connected
           end
 
+
           % % % ------------------------------------------------ % % %
           % % % --------------  Helper Functions -------------- % % %
+          % % % ------------------------------------------------ % % %
           
           % Reset CRC
           function obj = crc_clear(obj)
@@ -186,6 +193,10 @@ classdef Roboclaw
               obj.port.write(commandBytes);
           end
 
+
+          %%--------Read Functions-------%%
+
+
           function [result, obj] = readchecksumword(obj)
               data = read(obj.port, 2, "uint8");
               if numel(data) == 2
@@ -196,6 +207,7 @@ classdef Roboclaw
                   result = 0;
               end
           end
+
 
           function [result,val] = readbyte(obj)
               data = read(obj.port, 1, "uint8");
@@ -209,9 +221,7 @@ classdef Roboclaw
               end
           end
 
-
-
-          %--------Write Functions-------%
+          %%--------Write Functions-------%%
 
           function writebyte(obj, val)
               obj.crc_update(bitand(val,255));
@@ -235,42 +245,36 @@ classdef Roboclaw
               result = false;
           end
 
-          % function write1(obj, address, cmd, val)
-          %     % Need to write trystimeout = retries, sendcommand, writebyte, write
-          %     % checksum first
-          %     trys = obj.retries
-          %     while trys
-          % 
-          % 
-          % 
-          % 
-          % end
 
+          function result = write1(obj, address, cmd, val)
+              trys = obj.retries;
+              while trys
+                  trys = trys - 1;
+                  obj.sendcommand(address, cmd);
+                  obj.writebyte(val)
+                  if obj.writechecksum
+                      result = true;
+                      return
+                  end
+              end
+              result = false;
+          end
+          
 
 
           % % % ------------------------------------------------ % % %
           % % % --------------- Command Functions --------------- % % %
-          % 
-          % function movement = ForwardM1(obj, address, val):
-          %     % Need to finish write1 function
-          % end
-
+          % % % ------------------------------------------------ % % %
           
 
+          function movement = ForwardM1(obj, address, val)
+              movement = obj.write1(address, obj.M1FORWARD ,val);
+          end
 
 
-%       
+          function movement = BackwardM1(obj, address, val)
+              movement = obj.write1(address, obj.M1BACKWARD, val);
+          end       
 
-%         function obj = crc_update(obj, data)
-%              obj.crc = bitxor(obj.crc, bitshift(data, 8));
-%             for bit = 0:7
-%                 if bitand(obj.crc,32768) == 32768
-%                     obj.crc = bitxor(bitshift(obj.crc, 1), int32(4129));
-%                 else
-%                    obj.crc = bitshift(obj.crc, 1);
-%                 end
-%             end
-%         end
-      
     end
 end
