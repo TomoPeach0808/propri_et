@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 import time
-file_path = f"{Path.cwd()}/roboclaw_python"
+file_path = f"{Path.cwd()}/Roboclaw_python_import"
 sys.path.append(file_path)
 from roboclaw_3 import Roboclaw
 
@@ -10,10 +10,12 @@ from roboclaw_3 import Roboclaw
 roboclaw = Roboclaw("/dev/tty.usbmodem14101", 14101)
 roboclaw.Open()
 
-roboclaw.ForwardM1(0x80,10)
-time.sleep(0.2)
+roboclaw.ForwardM1(0x80,5)
+time.sleep(0.5)
+roboclaw.BackwardM1(0x80,5)
 
-roboclaw.ForwardM1(0x80,3)
+
+# roboclaw.ForwardM1(0x80,3)
 
 
 # import serial
