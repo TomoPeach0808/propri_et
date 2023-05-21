@@ -7,12 +7,12 @@ from roboclaw_3 import Roboclaw
 
 
 # Code starts here
-roboclaw = Roboclaw("/dev/tty.usbmodem14101", 14101)
+roboclaw = Roboclaw("/dev/tty.usbmodem14101", 9600)
 roboclaw.Open()
 
 roboclaw.ForwardM1(0x80,5)
-time.sleep(0.5)
-roboclaw.BackwardM1(0x80,5)
+# time.sleep(0.12)
+# roboclaw.BackwardM1(0x80,5)
 
 
 # roboclaw.ForwardM1(0x80,3)

@@ -136,14 +136,15 @@ classdef Roboclaw
           
           % Open Serial port connection
 	  % % Note: Perhaps add a function to close the connection? % % 
-          function result = Open(obj)
+          function [obj, result] = Open(obj)
             try
                 obj.port = serialport(obj.comport, obj.rate, "Timeout", 1);
+%                 disp('Connection established')
             catch
-                result = 0; % connection fail
-                return;
+%                 disp("Unable to establish connection");
+                result = 0;
             end
-            result = 1; % connected
+            result = 1;
           end
 
 
@@ -161,37 +162,34 @@ classdef Roboclaw
               obj.crc = bitxor(obj.crc, bitshift(data,8));
               for bit = 0:7
                   if bitand(obj.crc,32768) == 32768
-                      obj.crc = bitxor(bitshift(obj.crc, 1), 4129);
+                      obj.crc = bitxor(bitshift(obj.crc, 1), 4129); %int32(4129) instead maybe?
                   else
                       obj.crc = bitshift(obj.crc,1);
                   end
               end
           end
 
-          % function obj = crc_update(obj, data)
-          %      obj.crc = bitxor(obj.crc, bitshift(data, 8));
-          %     for bit = 0:7
-          %         if bitand(obj.crc,32768) == 32768
-          %             obj.crc = bitxor(bitshift(obj.crc, 1), int32(4129));
-          %         else
-          %            obj.crc = bitshift(obj.crc, 1);
-          %         end
-          %     end
-          % end
-
-
           % Convert address and command to bytes and writes to serial port
           function sendcommand(obj, address, command)
               % Performs crc value on address
               obj.crc_clear();
               obj.crc_update(address);
-
-              addressBytes = typecast(uint8(address), 'uint8'); %Convert address to 'uint8' type
-              obj.port.write(addressBytes);
+              
+%               addressBytes = typecast(uint8(address), 'uint8'); %Convert address to 'uint8' type
+%               obj.port.write(addressBytes);
+              
+              % addressBytes = uint8(address);
+              
+              addressBytes = typecast(address, 'uint8');
+              write(obj.port, addressBytes, 'uint8');
 
               obj.crc_update(command);
-              commandBytes = typecast(uint8(command), 'uint8');
-              obj.port.write(commandBytes);
+%               commandBytes = typecast(uint8(command), 'uint8');
+%               obj.port.write(commandBytes);
+%               commandBytes = uint8(command);
+              commandBytes = typecast(command, 'uint8');
+              write(obj.port, commandBytes, 'uint8');
+              
           end
 
 
@@ -200,6 +198,9 @@ classdef Roboclaw
 
           function [result, obj] = readchecksumword(obj)
               data = read(obj.port, 2, "uint8");
+%               disp("Display data")
+%               disp(class(data))
+%               disp(data)
               if numel(data) == 2
                   obj.crc = bitor(bitshift(data(1), 8), data(2));
                   result = 1;
@@ -211,7 +212,22 @@ classdef Roboclaw
 
 
           function [result,val] = readbyte(obj)
-              data = read(obj.port, 1, "uint8");
+              count = 0
+              while count < 10
+                  data = read(obj.port, 1, "uint8");
+                  disp("Display Data");
+    %               numBytes = obj.port.numbytesavailable;
+    %               disp('NumBytes:' + numBytes)
+                  disp(class(data));
+                  disp(data);
+                  pause(0.01)
+                  count = count + 1
+                  
+                  if ~isempty(data)
+                      break
+                  end
+              end
+              
               if ~isempty(data)
                   val = data(1);
                   obj.crc_update(val);
@@ -227,7 +243,8 @@ classdef Roboclaw
           function writebyte(obj, val)
               obj.crc_update(bitand(val,255));
               valBytes = typecast(uint8(val), 'uint8');
-              obj.port.write(valBytes);
+              write(obj.port, valBytes, 'uint8')
+              % obj.port.write(valBytes);
           end
 
           function writeword(obj, val)
@@ -252,11 +269,11 @@ classdef Roboclaw
               while trys > 0
                   obj.sendcommand(address, cmd);
                   obj.writebyte(val)
-                  if obj.writechecksum
+                  if obj.writechecksum()
                       result = true;
                       return
                   end
-		  trys = trys - 1;
+                  trys = trys - 1;
               end
               result = false;
           end
