@@ -9,7 +9,12 @@ else
     disp('Unable to establish connection')  
 end
 
-% my_port = my_roboclaw.port;
+my_port = my_roboclaw.port;
+
+
+writeline(my_port,"*IDN?")
+my_port.NumBytesAvailable
+
 % % fopen(my_port);
 % 
 % disp('Serial Port Monitor Started. Press Ctrl+C to stop.');
@@ -30,10 +35,10 @@ end
 % clear my_port;
 
 % address = dec2hex(128);
-address = 128;
-speed = 5;
-
-
-my_roboclaw.ForwardM1(address, speed);
-
-clear my_roboclaw % Disconnects
+% address = 128;
+% speed = 5;
+% 
+% 
+% my_roboclaw.ForwardM1(address, speed);
+% 
+% clear my_roboclaw % Disconnects

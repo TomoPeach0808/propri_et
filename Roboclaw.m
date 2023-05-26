@@ -212,21 +212,9 @@ classdef Roboclaw
 
 
           function [result,val] = readbyte(obj)
-              count = 0
-              while count < 10
-                  data = read(obj.port, 1, "uint8");
-                  disp("Display Data");
-    %               numBytes = obj.port.numbytesavailable;
-    %               disp('NumBytes:' + numBytes)
-                  disp(class(data));
-                  disp(data);
-                  pause(0.01)
-                  count = count + 1
-                  
-                  if ~isempty(data)
-                      break
-                  end
-              end
+              data = read(obj.port, 1, "uint8");
+              disp("Display Data");
+              disp(data);
               
               if ~isempty(data)
                   val = data(1);
