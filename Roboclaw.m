@@ -175,18 +175,10 @@ classdef Roboclaw
               obj.crc_clear();
               obj.crc_update(address);
               
-%               addressBytes = typecast(uint8(address), 'uint8'); %Convert address to 'uint8' type
-%               obj.port.write(addressBytes);
-              
-              % addressBytes = uint8(address);
-              
               addressBytes = typecast(address, 'uint8');
               write(obj.port, addressBytes, 'uint8');
 
               obj.crc_update(command);
-%               commandBytes = typecast(uint8(command), 'uint8');
-%               obj.port.write(commandBytes);
-%               commandBytes = uint8(command);
               commandBytes = typecast(command, 'uint8');
               write(obj.port, commandBytes, 'uint8');
               
