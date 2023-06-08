@@ -146,6 +146,13 @@ classdef Roboclaw
             end
             result = 1;
           end
+	  
+	  function Bytes = to_byte(obj, num, numbytes)
+              % Use python function for bytes
+              pynum = py.int(num);
+              pynumbytes = py.int(numbytes);
+              Bytes = pynum.to_bytes(pynumbytes, "big");
+          end
 
 
           % % % ------------------------------------------------ % % %
@@ -170,17 +177,32 @@ classdef Roboclaw
           end
 
           % Convert address and command to bytes and writes to serial port
-          function sendcommand(obj, address, command)
+           function sendcommand(obj, address, command)
               % Performs crc value on address
               obj.crc_clear();
               obj.crc_update(address);
               
-              addressBytes = typecast(address, 'uint8');
-              write(obj.port, addressBytes, 'uint8');
+              % Try to call the Python serial port object instead of Matlab
+              obj.PythonSerialPort = py.serial.Serial(obj.comport, py.int(obj.rate), 1);
+
+              % Convert into Python format
+              addressBytes = obj.to_byte(address,1);
+              obj.pythonserialport.write(addressBytes);
+
+              % % Original code (in Matlab)
+              % addressBytes = typecast(address, 'uint8');
+              % write(obj.port, addressBytes, 'uint8');
 
               obj.crc_update(command);
-              commandBytes = typecast(command, 'uint8');
-              write(obj.port, commandBytes, 'uint8');
+
+              % Convert into Python format
+              commandBytes = obj.to_byte(command,1);
+              obj.pythonserialport.write(commandBytes);
+
+              % % Original code (in Matlab)
+              % commandBytes = typecast(command, 'uint8');
+              % write(obj.port, commandBytes, 'uint8');
+
               
           end
 
@@ -222,9 +244,13 @@ classdef Roboclaw
 
           function writebyte(obj, val)
               obj.crc_update(bitand(val,255));
-              valBytes = typecast(uint8(val), 'uint8');
-              write(obj.port, valBytes, 'uint8')
-              % obj.port.write(valBytes);
+              % Convert to Python version
+              valBytes = obj.to_byte(val,1);
+              obj.pythonserialport.write(valBytes);
+              
+              % % Original code in Matlab
+              % valBytes = typecast(val,'uint8');
+              % write(obj.port, valBytes, 'uint8')
           end
 
           function writeword(obj, val)
